@@ -12,7 +12,7 @@ description: >
 
 Why resume breaks: the session log stores the model's encrypted reasoning (`encrypted_content`). That blob is bound to the account that produced it, and a session on a different account cannot replay it.
 
-## Muse (verified 2026-11-10)
+## Muse (verified 2026-11-10 on two production sessions)
 
 1. Stop the lane by PID: the muse process, its flock wrapper and the lane's `wake` window. Kill by PID only.
 2. Back up the whole session directory: `cp -a ~/.local/share/muse/sessions/<yyyy>/<mm>/<dd>/<session-id> <backup-dir>/`.
@@ -21,7 +21,10 @@ Why resume breaks: the session log stores the model's encrypted reasoning (`encr
    agent-session-strip-reasoning --runtime muse --session-log <dir>/session.jsonl
    agent-session-strip-reasoning --runtime muse --session-log <dir>/session.jsonl --apply --backup-dir <backup-dir>
    ```
-   This removes `encrypted_content` from records whose `payload.event.kind` is `reasoning_committed`. Records, their order, text and sequence stay as they are.
+   It keeps every record and removes three account-bound artifacts:
+   - `encrypted_content` of `reasoning_committed` records;
+   - nested encrypted reasoning blobs in context-compaction and projection checkpoints (`replay_model_messages[].content[]`, `model_messages[]`, `resume_state` copies). Long-running sessions have them; without this the resumed turn fails with 400 `encrypted_content was not issued to this caller`;
+   - the `id` of nested `reasoning_replay` items that no longer carry encrypted content. A bare id points at a server-side item of the OLD account and fails with 400 `Referenced reasoning item ... not found`. Keep the item itself: dropping it makes Muse report "log cannot be replayed".
 4. Check: `muse trace inspect --session-log <dir>/session.jsonl --format json` must report `"load_status": "loaded"`. `muse usage --json` must show the new account (its tier, usage near 0).
 5. Resume with the lane's usual flags and env: `muse --model … --workspace <work> … resume <session-id>`.
 6. Restart the lane's wake sidecar, give the session one short turn, and check that it answers. Old 429 lines in the pane are history.

@@ -60,13 +60,32 @@ func lines(_ s: String) -> [String] { s.split(separator: "\n").map(String.init) 
         #expect(try String(contentsOf: bak.appendingPathComponent(backups[0]), encoding: .utf8) == fixture)
     }
 
+    /// Claim: nested checkpoint copies lose their encrypted blob and the stale reasoning_replay id, but the item, its
+    /// sibling text and every record stay (dropping the items broke Muse's replay in the 2026-11-10 repair).
+    @Test func nestedCheckpointReasoningIsNeutralizedNotDropped() throws {
+        let nested = """
+        {"id":"9","payload_type":"runtime.session","payload":{"kind":"run","event":{"kind":"context_compaction_installed","replay_model_messages":[{"role":"assistant","content":[{"kind":"reasoning_replay","id":"rs_old","encrypted_content":"NESTED-OLD-BLOB"},{"kind":"text","text":"keep me"}]}]}}}
+
+        """
+        let d = try tempDir(); let log = d.appendingPathComponent("session.jsonl")
+        try nested.write(to: log, atomically: true, encoding: .utf8)
+        let r = try run(["--runtime", "muse", "--session-log", log.path, "--apply", "--backup-dir", d.appendingPathComponent("b").path])
+        #expect(r.code == 0)
+        let after = try String(contentsOf: log, encoding: .utf8)
+        #expect(lines(after).count == 1)
+        #expect(!after.contains("NESTED-OLD-BLOB"))
+        #expect(!after.contains("rs_old"))
+        #expect(after.contains("\"kind\":\"reasoning_replay\""))
+        #expect(after.contains("keep me"))
+    }
+
     /// Claim: the default dry run reports the count and changes nothing.
     @Test func dryRunChangesNothing() throws {
         let d = try tempDir(); let log = d.appendingPathComponent("session.jsonl")
         try fixture.write(to: log, atomically: true, encoding: .utf8)
         let r = try run(["--runtime", "muse", "--session-log", log.path])
         #expect(r.code == 0)
-        #expect(r.out.contains("encrypted_content 1"))
+        #expect(r.out.contains("reasoning_committed 1"))
         #expect(try String(contentsOf: log, encoding: .utf8) == fixture)
     }
 
