@@ -8,6 +8,10 @@
     "agent-session-strip-reasoning": {
       "type": "script",
       "unix_path": "scripts/strip-reasoning.py"
+    },
+    "agent-session-convert-claude-to-muse": {
+      "type": "script",
+      "unix_path": "scripts/convert-claude-to-muse.py"
     }
   }
 }
