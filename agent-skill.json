@@ -1,0 +1,13 @@
+{
+  "schema_version": 3,
+  "capabilities": {},
+  "runtime_roots": [
+    "scripts"
+  ],
+  "commands": {
+    "agent-session-strip-reasoning": {
+      "type": "script",
+      "unix_path": "scripts/strip-reasoning.py"
+    }
+  }
+}
