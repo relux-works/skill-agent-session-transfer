@@ -20,6 +20,14 @@ agent-session-convert project --bundle bundle --to claude --workspace "$PWD" --o
 
 Inspect `fidelity.json` in each projection. Native previews support all nine combinations. For a target awaiting production native admission, choose `--strategy continuation_context`. Its `launch.json` gives the arguments, working directory and optional stdin file for the official target CLI. Launch only for an authorized transfer. The fresh target receives historical dialogue as a single user-context message.
 
+For a managed transfer, keep the source profile. The CLI resolves the registered provider
+homes and records the destination in `projection/validation.json`. Use the receipt's
+complete resume command. A detached source log requires `--target-profile NAME` or
+`--personal` when publishing. For a source UUID, use
+`agent-session-convert locate --from muse --session-id UUID`.
+Publication verifies the history. The launcher owns host selection, hook installation and
+the separate verification of the new session's a2a binding and idle wake.
+
 For Codex CLI 0.171.0 on macOS arm64, use an active ChatGPT login and run `agent-session-convert convert --from muse --to codex --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Choose `claude` or `codex` as the source for the other two readers. Codex creates a fresh account-scoped thread and the converter checks its UI history and model input. Use the UUID in `projection/validation.json` for resume. Codex-to-Codex qualification used one account.
 
 For a qualified native Muse publish, run `agent-session-convert convert --from claude --to muse --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Review `projection/validation.json` and its resume arguments. Runtime versions and remaining qualification requirements are recorded in the [converter qualification report](https://github.com/relux-works/agent-session-convert/blob/d0844044c45c24cd6e98386ef972289e52313e62/QUALIFICATION.md).
