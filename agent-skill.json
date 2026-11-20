@@ -12,6 +12,10 @@
     "agent-session-convert-claude-to-muse": {
       "type": "script",
       "unix_path": "scripts/convert-claude-to-muse.py"
+    },
+    "agent-session-convert": {
+      "type": "script",
+      "unix_path": "scripts/agent-session-convert.pyz"
     }
   }
 }

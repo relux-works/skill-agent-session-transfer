@@ -1,21 +1,28 @@
 ---
 name: agent-session-transfer
 description: >
-  Move an agent CLI session to another account or provider and resume it natively.
-  Two verified paths: Muse to another Muse account (strip account-bound encrypted
-  reasoning in place, keep every record) and Claude Code to Muse (synthesize a
-  native Muse session from the Claude log through a bundle IR, checkpoint and
-  templated turns; thinking blocks are omitted, tools summarized). Use when a
-  lane's login moved to another subscription and `resume` fails, or when a Claude
-  Code session must continue as Muse. Codex paths are not verified and are
-  refused. Russian triggers: "перенести сессию на другой аккаунт", "сконвертировать
-  сессию клода в muse", "конвертация сессии Claude Code в Muse", "резюм после смены
-  аккаунта", "вырезать reasoning", "encrypted_content", "сессия не поднимается после логина".
+  Convert Claude Code, Codex CLI and Muse Code transcripts through reusable IR. Use to project
+  session history into another harness, prepare continuation context, inspect fidelity, or move
+  a Muse session between accounts. Includes the qualified Claude-to-Muse native transfer.
 ---
 
 # Agent session transfer between accounts and providers
 
-Why resume breaks across accounts: the session log stores the model's encrypted reasoning (`encrypted_content`, or a Claude `thinking` signature). That blob is bound to the producing account/provider, and a session elsewhere cannot replay it. Design background: the `agent-session-convert` spec (IR, fidelity dispositions, staged/live read-back); this skill implements two of its paths.
+## IR conversion
+
+Curator installs `agent-session-convert` with this skill. Capture the transcript once and reuse the private bundle for each destination. Accepted runtime names are `claude`, `codex`, and `muse`.
+
+```sh
+agent-session-convert capture --from muse --source-log /path/to/session.jsonl --out-dir bundle
+agent-session-convert project --bundle bundle --to codex --workspace "$PWD" --out-dir codex-preview
+agent-session-convert project --bundle bundle --to claude --workspace "$PWD" --out-dir claude-preview
+```
+
+Inspect `fidelity.json` in each projection. Native previews support all nine combinations. For a target awaiting production native admission, choose `--strategy continuation_context`. Its `launch.json` gives the arguments, working directory and optional stdin file for the official target CLI. Launch only for an authorized transfer. The fresh target receives historical dialogue as a single user-context message.
+
+For a qualified native publish, run `agent-session-convert convert --from claude --to muse --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Review `projection/validation.json` and its resume arguments. Runtime versions and remaining qualification requirements are recorded in the [converter qualification report](https://github.com/relux-works/agent-session-convert/blob/66f1d950a0acec85a71eb3469aef7882110565cf/QUALIFICATION.md).
+
+Why resume breaks across accounts: the session log stores the model's encrypted reasoning (`encrypted_content`, or a Claude `thinking` signature). That blob is bound to the producing account/provider, and a session elsewhere cannot replay it. Design background: the `agent-session-convert` spec (IR, fidelity dispositions, staged/live read-back); the legacy commands below retain their existing transfer procedures.
 
 ## Muse -> Muse, another account (verified 2026-11-10 on two production sessions)
 
@@ -69,10 +76,6 @@ muse exec --workspace <ws> "turn one"   # then resume it once with a plain text 
 agent-session-convert-claude-to-muse --source-log <any> --workspace <ws> --out-dir <tmp> \
   --template-log <that session.jsonl> --emit-template scripts/muse-turn-template.json
 ```
-
-## Codex (not verified)
-
-The same stripping principle probably applies to Codex rollout `reasoning` items, but no path is tested, so both scripts refuse it. Add a runtime only together with a verified transfer (spec 14.4: real A->B move, provider inspection, one resumed turn, unstripped negative control) and tests.
 
 ## Rules
 
