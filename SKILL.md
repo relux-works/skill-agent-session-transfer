@@ -3,7 +3,7 @@ name: agent-session-transfer
 description: >
   Convert Claude Code, Codex CLI and Muse Code transcripts through reusable IR. Use to project
   session history into another harness, prepare continuation context, inspect fidelity, or move
-  a Muse session between accounts. Includes the qualified Claude-to-Muse native transfer.
+  a Muse session between accounts. Publishes fresh native Codex sessions from all three readers and supports the qualified Claude-to-Muse transfer.
 ---
 
 # Agent session transfer between accounts and providers
@@ -20,7 +20,9 @@ agent-session-convert project --bundle bundle --to claude --workspace "$PWD" --o
 
 Inspect `fidelity.json` in each projection. Native previews support all nine combinations. For a target awaiting production native admission, choose `--strategy continuation_context`. Its `launch.json` gives the arguments, working directory and optional stdin file for the official target CLI. Launch only for an authorized transfer. The fresh target receives historical dialogue as a single user-context message.
 
-For a qualified native publish, run `agent-session-convert convert --from claude --to muse --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Review `projection/validation.json` and its resume arguments. Runtime versions and remaining qualification requirements are recorded in the [converter qualification report](https://github.com/relux-works/agent-session-convert/blob/66f1d950a0acec85a71eb3469aef7882110565cf/QUALIFICATION.md).
+For Codex CLI 0.171.0 on macOS arm64, use an active ChatGPT login and run `agent-session-convert convert --from muse --to codex --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Choose `claude` or `codex` as the source for the other two readers. Codex creates a fresh account-scoped thread and the converter checks its UI history and model input. Use the UUID in `projection/validation.json` for resume. Codex-to-Codex qualification used one account.
+
+For a qualified native Muse publish, run `agent-session-convert convert --from claude --to muse --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Review `projection/validation.json` and its resume arguments. Runtime versions and remaining qualification requirements are recorded in the [converter qualification report](https://github.com/relux-works/agent-session-convert/blob/d0844044c45c24cd6e98386ef972289e52313e62/QUALIFICATION.md).
 
 Why resume breaks across accounts: the session log stores the model's encrypted reasoning (`encrypted_content`, or a Claude `thinking` signature). That blob is bound to the producing account/provider, and a session elsewhere cannot replay it. Design background: the `agent-session-convert` spec (IR, fidelity dispositions, staged/live read-back); the legacy commands below retain their existing transfer procedures.
 
