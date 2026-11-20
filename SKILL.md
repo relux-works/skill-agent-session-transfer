@@ -30,7 +30,7 @@ the separate verification of the new session's a2a binding and idle wake.
 
 For Codex CLI 0.171.0 on macOS arm64, use an active ChatGPT login and run `agent-session-convert convert --from muse --to codex --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Choose `claude` or `codex` as the source for the other two readers. Codex creates a fresh account-scoped thread and the converter checks its UI history and model input. Use the UUID in `projection/validation.json` for resume. Codex-to-Codex qualification used one account.
 
-For a qualified native Muse publish, run `agent-session-convert convert --from claude --to muse --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Review `projection/validation.json` and its resume arguments. Runtime versions and remaining qualification requirements are recorded in the [converter qualification report](https://github.com/relux-works/agent-session-convert/blob/d0844044c45c24cd6e98386ef972289e52313e62/QUALIFICATION.md).
+For a qualified native Muse publish, run `agent-session-convert convert --from claude --to muse --source-log PATH --workspace DIR --out-dir FRESH_DIR --apply`. Review `projection/validation.json` and its resume arguments. Runtime versions and remaining qualification requirements are recorded in the [converter qualification report](references/QUALIFICATION.md).
 
 Why resume breaks across accounts: the session log stores the model's encrypted reasoning (`encrypted_content`, or a Claude `thinking` signature). That blob is bound to the producing account/provider, and a session elsewhere cannot replay it. Design background: the `agent-session-convert` spec (IR, fidelity dispositions, staged/live read-back); the legacy commands below retain their existing transfer procedures.
 
